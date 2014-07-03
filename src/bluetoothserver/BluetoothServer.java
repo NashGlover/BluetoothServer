@@ -6,12 +6,13 @@
 
 package bluetoothserver;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -51,6 +52,19 @@ public class BluetoothServer {
         
         //InputStream inStream = connection.openInputStream();
         DataInputStream inputStream = new DataInputStream(connection.openInputStream());
+        DataOutputStream outputStream = new DataOutputStream(connection.openDataOutputStream());
+        
+        String message = "Hello from computer";
+        System.out.println("About to write...");
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+        }
+        byte[] outputMessage = message.getBytes(); 
+        //outputMessage = message.getBytes();
+        outputStream.write(outputMessage);
+        System.out.println("Wrote");
+        
         //BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
         byte[] messageByte = new byte[1000];
         System.out.println("Reading line...");
