@@ -168,7 +168,7 @@ public class BluetoothServer {
         BluetoothServer server = new BluetoothServer();
         server.startServer();
         server.listenToMessage();
-        localListener = new LocalListener(messageQueue);
+        localListener = new LocalListener(messageQueue, 2222);
         localListener.connect();
         server.readMessagesFromClient();
         System.out.println("DONE WITH THE MAIN THREAD!");

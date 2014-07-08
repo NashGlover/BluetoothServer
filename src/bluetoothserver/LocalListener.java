@@ -6,7 +6,12 @@
 
 package bluetoothserver;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -15,22 +20,31 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class LocalListener {
     ServerSocket listener = null;
+    Socket clientSocket = null;
+    int port;
     LinkedBlockingQueue<byte[]> messageQueue;
     
-    public LocalListener (LinkedBlockingQueue<byte[]> _messageQueue) {
+    private DataInputStream in = null;
+    
+    public LocalListener (LinkedBlockingQueue<byte[]> _messageQueue, int _port) {
         messageQueue = _messageQueue;
+        port = _port;
     }
     
     public void connect() {
+        
         Runnable runnable = new Runnable () {
             
             public void run() {
                 System.out.println("Runnable running");
                 try {
-                    messageQueue.put("Hello".getBytes());
-                    messageQueue.put("Another line".getBytes());
-                    messageQueue.put("Third line.".getBytes());
-                } catch (InterruptedException e) {
+                    listener = new ServerSocket(2222);
+                    listener.setSoTimeout(15000);
+                    clientSocket = listener.accept();
+                    in = new DataInputStream(clientSocket.getInputStream());
+                } catch (SocketException sockE) {
+                    System.out.println("Socket exception");
+                } catch (IOException e) {
                     System.out.println(e.getMessage());
                 }
             }
