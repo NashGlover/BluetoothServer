@@ -39,11 +39,16 @@ public class LocalListener {
                 System.out.println("Runnable running");
                 try {
                     listener = new ServerSocket(2222);
-                    listener.setSoTimeout(15000);
+                    //listener.setSoTimeout(15000);
+                    System.out.println("Waiting for AIONAV connection...");
                     clientSocket = listener.accept();
+                    System.out.println("AIONAV connection started!");
                     in = new DataInputStream(clientSocket.getInputStream());
+                    messageQueue.put("LocalListener connected".getBytes());
                 } catch (SocketException sockE) {
-                    System.out.println("Socket exception");
+                    System.out.println("Socket exception: " + sockE.getMessage());
+                } catch (InterruptedException interrupt) {
+                    System.out.println("interrupted: " + interrupt.getMessage());
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
                 }
@@ -53,5 +58,13 @@ public class LocalListener {
         Thread thread = new Thread(runnable);
         thread.start();
         //Thread listenThread = new Thread()
+    }
+    
+    public DataInputStream getInputStream() {
+        return in;
+    }
+    
+    public Socket getSocket() {
+        return clientSocket;
     }
 }
