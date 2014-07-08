@@ -38,10 +38,9 @@ public class LocalListener {
             public void run() {
                 System.out.println("Runnable running");
                 try {
-                    listener = new ServerSocket(2222);
                     //listener.setSoTimeout(15000);
                     System.out.println("Waiting for AIONAV connection...");
-                    clientSocket = listener.accept();
+                    clientSocket = new Socket("localhost", 2222);
                     System.out.println("AIONAV connection started!");
                     in = new DataInputStream(clientSocket.getInputStream());
                     messageQueue.put("LocalListener connected".getBytes());

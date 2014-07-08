@@ -32,7 +32,8 @@ public class BluetoothServer {
     RemoteDevice dev = null;
     DataInputStream bluetoothInputStream = null;
     DataOutputStream bluetoothOutputStream = null;
-    
+    StreamConnection connection;
+    Communication communication;
     static LocalListener localListener;
     
     AtomicBoolean running = new AtomicBoolean();
@@ -48,7 +49,8 @@ public class BluetoothServer {
         
         
         // Create a UUID for SPP
-        UUID uuid = new UUID("1101", true);
+        UUID uuid = new UUID("0001", true);
+        System.out.println(uuid.toString());
         // Create the service url
         String connectionString = "btspp://localhost:" + uuid + ";name=Sample SPP Server";
         
@@ -57,11 +59,11 @@ public class BluetoothServer {
         
         // Wait for client connection
         System.out.println("\nServer started. Waiting for clients to connect...");
-        StreamConnection connection = streamConnNotifier.acceptAndOpen();
+        connection = streamConnNotifier.acceptAndOpen();
         
         dev = RemoteDevice.getRemoteDevice(connection);
         System.out.println("Remote device address: " + dev.getBluetoothAddress());
-        System.out.println("Remote device name: " + dev.getFriendlyName(true));
+       // System.out.println("Remote device name: " + dev.getFriendlyName(true));
         
         //InputStream inStream = connection.openInputStream();
         bluetoothInputStream = new DataInputStream(connection.openInputStream());
@@ -84,7 +86,7 @@ public class BluetoothServer {
         //read string form spp client*/
     }
     
-    public void readMessagesFromClient() {
+    /*public void readMessagesFromClient() {
         byte[] messageByte = new byte[1000];
         try {
             bluetoothInputStream.read(messageByte);
@@ -93,9 +95,11 @@ public class BluetoothServer {
                 System.out.println(message);
                 messageByte = new byte[1000];
                 bluetoothInputStream.read(messageByte);
-                message = "";
                 message = new String(messageByte, "UTF-8");
                 message = message.trim();
+                if (message.equals("LocalListener connected")) {
+                    
+                }
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -108,38 +112,36 @@ public class BluetoothServer {
             System.out.println(e.getMessage());
         }
         running.set(false);
-    }
+    }*/
     
     private void listenToMessage() {
         System.out.println("In listenToMessage");
-        Runnable runnable = new Runnable() {
-            byte[] messageByte = new byte[1000];
-            public void run() {
-                System.out.println("In the listenToMessage");
-                running.set(true);
-                while (running.get()) {
-                    try {
-                        System.out.println("Before message");
-                        String message;
-                        System.out.println("Taking a message from queue");
-                        messageByte = messageQueue.take();
-                        message = new String(messageByte, "UTF-8");
-                        if (message.equals("Done.")) {
-                            running.set(false);
-                        }
-                        System.out.println("Printout out message");
-                        System.out.println(message);
-                    } catch (InterruptedException e) {
-                        System.out.println(e.getMessage());
-                    } catch (UnsupportedEncodingException codingException) {
-                        System.out.println("Unsupported Coding Exception");
-                    }
+        byte[] messageByte = new byte[1000];
+        System.out.println("In the listenToMessage");
+        running.set(true);
+        while (running.get()) {
+            try {
+                String message;
+                System.out.println("Taking a message from queue");
+                messageByte = messageQueue.take();
+                message = new String(messageByte, "UTF-8");
+                if (message.equals("Done.")) {
+                    running.set(false);
                 }
-                System.out.println("listenToMessage done");
-            }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+                if (message.equals("LocalListener connected")) {
+                    System.out.println("LocalListener connted");
+                    communication = new Communication(bluetoothOutputStream, localListener.getSocket());
+                    communication.start();
+                }
+                System.out.println("Printout out message");
+                System.out.println(message);
+                } catch (InterruptedException e) {
+                    System.out.println(e.getMessage());
+                } catch (UnsupportedEncodingException codingException) {
+                    System.out.println("Unsupported Coding Exception");
+                }
+        }
+        System.out.println("listenToMessage done");
     }
     
     private void listen() {
@@ -167,10 +169,9 @@ public class BluetoothServer {
         
         BluetoothServer server = new BluetoothServer();
         server.startServer();
-        server.listenToMessage();
         localListener = new LocalListener(messageQueue, 2222);
         localListener.connect();
-        server.readMessagesFromClient();
+        server.listenToMessage();
         System.out.println("DONE WITH THE MAIN THREAD!");
     }
     
