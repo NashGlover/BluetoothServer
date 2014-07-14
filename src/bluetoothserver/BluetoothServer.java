@@ -170,7 +170,8 @@ public class BluetoothServer {
         BluetoothServer server = new BluetoothServer();
         server.startServer();
         localListener = new LocalListener(messageQueue, 2222);
-        localListener.connect();
+        Thread localListenerThread = new Thread(localListener);
+        localListenerThread.start();
         server.listenToMessage();
         System.out.println("DONE WITH THE MAIN THREAD!");
     }

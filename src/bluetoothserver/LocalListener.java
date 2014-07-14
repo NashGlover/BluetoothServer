@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  *
  * @author Administrator
  */
-public class LocalListener {
+public class LocalListener implements Runnable {
     ServerSocket listener = null;
     Socket clientSocket = null;
     int port;
@@ -31,32 +31,22 @@ public class LocalListener {
         port = _port;
     }
     
-    public void connect() {
-        
-        Runnable runnable = new Runnable () {
-            
-            public void run() {
-                System.out.println("Runnable running");
-                try {
-                    //listener.setSoTimeout(15000);
-                    System.out.println("Waiting for AIONAV connection...");
-                    clientSocket = new Socket("localhost", 2222);
-                    System.out.println("AIONAV connection started!");
-                    in = new DataInputStream(clientSocket.getInputStream());
-                    messageQueue.put("LocalListener connected".getBytes());
-                } catch (SocketException sockE) {
-                    System.out.println("Socket exception: " + sockE.getMessage());
-                } catch (InterruptedException interrupt) {
-                    System.out.println("interrupted: " + interrupt.getMessage());
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-            }
-        };
-        
-        Thread thread = new Thread(runnable);
-        thread.start();
-        //Thread listenThread = new Thread()
+    public void run() {
+        System.out.println("Runnable running");
+        try {
+            //listener.setSoTimeout(15000);
+            System.out.println("Waiting for AIONAV connection...");
+            clientSocket = new Socket("localhost", 2222);
+            System.out.println("AIONAV connection started!");
+            in = new DataInputStream(clientSocket.getInputStream());
+            messageQueue.put("LocalListener connected".getBytes());
+        } catch (SocketException sockE) {
+            System.out.println("Socket exception: " + sockE.getMessage());
+        } catch (InterruptedException interrupt) {
+            System.out.println("interrupted: " + interrupt.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
     
     public DataInputStream getInputStream() {
