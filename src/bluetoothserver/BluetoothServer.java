@@ -132,7 +132,7 @@ public class BluetoothServer {
                 if (message.equals("LocalListener connected")) {
                     System.out.println("LocalListener connted");
                     communication = new Communication(bluetoothOutputStream, localListener.getSocket());
-                    communication.start();
+                    (new Thread(communication)).start();
                 }
                 System.out.println("Printout out message");
                 System.out.println(message);
