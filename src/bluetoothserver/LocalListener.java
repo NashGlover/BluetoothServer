@@ -33,19 +33,30 @@ public class LocalListener implements Runnable {
     
     public void run() {
         System.out.println("Runnable running");
-        try {
-            //listener.setSoTimeout(15000);
-            System.out.println("Waiting for AIONAV connection...");
-            clientSocket = new Socket("localhost", 2222);
-            System.out.println("AIONAV connection started!");
-            in = new DataInputStream(clientSocket.getInputStream());
-            messageQueue.put("LocalListener connected".getBytes());
-        } catch (SocketException sockE) {
-            System.out.println("Socket exception: " + sockE.getMessage());
-        } catch (InterruptedException interrupt) {
-            System.out.println("interrupted: " + interrupt.getMessage());
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+        Boolean scanning = true;
+        int scanCount = 0;
+            while (scanning && scanCount < 10) {
+            try {
+                //listener.setSoTimeout(15000);
+                System.out.println("Waiting for AIONAV connection...");
+                clientSocket = new Socket("localhost", 2222);
+                scanning = false;
+                System.out.println("AIONAV connection started!");
+                in = new DataInputStream(clientSocket.getInputStream());
+                messageQueue.put("LocalListener connected".getBytes());
+            } catch (SocketException sockE) {
+                System.out.println("Socket exception: " + sockE.getMessage());
+                scanCount++;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } catch (InterruptedException interrupt) {
+                System.out.println("interrupted: " + interrupt.getMessage());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
     

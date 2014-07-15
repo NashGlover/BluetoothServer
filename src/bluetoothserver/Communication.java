@@ -22,7 +22,7 @@ import javax.microedition.io.*;
  *
  * @author Administrator
  */
-public class Communication {
+public class Communication implements Runnable {
     Socket aionavSocket;
     RemoteDevice dev;
     DataInputStream in;
@@ -42,44 +42,38 @@ public class Communication {
         tracking = new AtomicBoolean();
     }
     
-    public void start() {
+    public void run() {
         System.out.println("In start!");
         tracking.set(true);
         byte[] messageBytes = new byte[1000];
-        Runnable runnable = new Runnable() {
-            public void run() {
-                int length;
-                int packetType;
-                long timestamp = 0;
-                double longitude, latitude, altitude;
-                double x, y, z;
-                while (tracking.get()) {
-                    try {
-                        int bytesRead;
-                        bytesRead = in.read(messageBytes);
-                        ByteBuffer buffer = ByteBuffer.wrap(messageBytes);
-                        if (bytesRead == 32 || bytesRead == 56) {
-                            length = buffer.getInt();
-                            packetType = buffer.getInt();
-                            buffer.getLong(8);
-                            buffer.getLong(16);
-                            if (bytesRead == 32) {
-                                timestamp = buffer.getLong(24);
-                                System.out.println("Heartbeat!");
-                            } else if (bytesRead == 56) {
-                                System.out.println("Location update!");
-                                if (packetType == 1) {
-                                    out.write(messageBytes);
-                                }
+            int length;
+            int packetType;
+            long timestamp = 0;
+            double longitude, latitude, altitude;
+            double x, y, z;
+            while (tracking.get()) {
+                try {
+                    int bytesRead;
+                    bytesRead = in.read(messageBytes);
+                    ByteBuffer buffer = ByteBuffer.wrap(messageBytes);
+                    if (bytesRead == 32 || bytesRead == 56) {
+                        length = buffer.getInt();
+                        packetType = buffer.getInt();
+                        buffer.getLong(8);
+                        buffer.getLong(16);
+                        if (bytesRead == 32) {
+                            timestamp = buffer.getLong(24);
+                            System.out.println("Heartbeat!");
+                        } else if (bytesRead == 56) {
+                            System.out.println("Location update!");
+                            if (packetType == 1) {
+                                out.write(messageBytes);
                             }
                         }
-                    } catch (IOException ioException) {
-                        System.out.println(ioException.getMessage());
                     }
+                } catch (IOException ioException) {
+                    System.out.println(ioException.getMessage());
                 }
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
-    }
+        }
 }
