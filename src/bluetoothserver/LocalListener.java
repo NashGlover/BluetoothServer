@@ -23,7 +23,7 @@ public class LocalListener implements Runnable {
     Socket clientSocket = null;
     int port;
     LinkedBlockingQueue<byte[]> messageQueue;
-    
+    Boolean scanning;
     private DataInputStream in = null;
     
     public LocalListener (LinkedBlockingQueue<byte[]> _messageQueue, int _port) {
@@ -31,9 +31,18 @@ public class LocalListener implements Runnable {
         port = _port;
     }
     
+    public void disconnect() {
+        try {
+            if (!clientSocket.isClosed())
+                clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void run() {
         System.out.println("Runnable running");
-        Boolean scanning = true;
+        scanning = true;
         int scanCount = 0;
             while (scanning && scanCount < 10) {
             try {

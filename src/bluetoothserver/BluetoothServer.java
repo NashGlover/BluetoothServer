@@ -86,10 +86,16 @@ public class BluetoothServer {
                 if (message.equals("Done.")) {
                     running.set(false);
                 }
-                if (message.equals("LocalListener connected")) {
+                else if (message.equals("LocalListener connected")) {
                     System.out.println("LocalListener connted");
-                    communication = new Communication(bluetoothOutputStream, localListener.getSocket());
+                    communication = new Communication(bluetoothOutputStream, localListener.getSocket(), messageQueue);
                     (new Thread(communication)).start();
+                }
+                else if (message.equals("Disconnected")) {
+                    System.out.println("Got the disconnected message");
+                    running.set(false);
+                    localListener.disconnect();
+                    connection.close();
                 }
                 System.out.println("Printout out message");
                 System.out.println(message);
@@ -97,6 +103,8 @@ public class BluetoothServer {
                     System.out.println(e.getMessage());
                 } catch (UnsupportedEncodingException codingException) {
                     System.out.println("Unsupported Coding Exception");
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
                 }
         }
         System.out.println("listenToMessage done");
@@ -124,14 +132,15 @@ public class BluetoothServer {
         LocalDevice localDevice = LocalDevice.getLocalDevice();
         System.out.println("Address: " + localDevice.getBluetoothAddress());
         System.out.println("Name: " + localDevice.getFriendlyName());
-        
-        BluetoothServer server = new BluetoothServer();
-        server.startServer();
-        localListener = new LocalListener(messageQueue, 2222);
-        localListenerThread = new Thread(localListener);
-        localListenerThread.start();
-        server.listenToMessage();
-        System.out.println("DONE WITH THE MAIN THREAD!");
+        Boolean run = true;
+        while (run) {
+            BluetoothServer server = new BluetoothServer();
+            server.startServer();
+            localListener = new LocalListener(messageQueue, 2222);
+            localListenerThread = new Thread(localListener);
+            localListenerThread.start();
+            server.listenToMessage();
+        }
     }
     
 }

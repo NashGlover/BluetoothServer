@@ -29,9 +29,11 @@ public class Communication implements Runnable {
     AtomicBoolean tracking;
     DataOutputStream out;
     StreamConnection bluetoothConnection;
+    LinkedBlockingQueue<byte[]> messageQueue;
     
-    public Communication(DataOutputStream _out, Socket _aionavSocket) {
+    public Communication(DataOutputStream _out, Socket _aionavSocket, LinkedBlockingQueue<byte[]> _messageQueue) {
       //  bluetoothConnection = _bluetoothConnection;
+        messageQueue = _messageQueue;
         aionavSocket = _aionavSocket;
         try {
             in = new DataInputStream(aionavSocket.getInputStream());
@@ -64,15 +66,24 @@ public class Communication implements Runnable {
                         if (bytesRead == 32) {
                             timestamp = buffer.getLong(24);
                             System.out.println("Heartbeat!");
+                            out.write(messageBytes);
+                            out.flush();
                         } else if (bytesRead == 56) {
                             System.out.println("Location update!");
                             if (packetType == 1) {
                                 out.write(messageBytes);
+                                out.flush();
                             }
                         }
                     }
                 } catch (IOException ioException) {
                     System.out.println(ioException.getMessage());
+                    try {
+                        messageQueue.put("Disconnected".getBytes());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    tracking.set(false);
                     System.out.println("Disconnected!");
                 }
             }
