@@ -69,51 +69,8 @@ public class BluetoothServer {
         //InputStream inStream = connection.openInputStream();
         bluetoothInputStream = new DataInputStream(connection.openInputStream());
         bluetoothOutputStream = new DataOutputStream(connection.openDataOutputStream());
-        
-        /*String message = "Hello from computer";
-        
-        System.out.println("About to write...");
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-        }
-        byte[] outputMessage = message.getBytes(); 
-        //outputMessage = message.getBytes();
-        bluetoothOutputStream.write(outputMessage);
-        System.out.println("Wrote");
-        
-        //BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
-        
-        //read string form spp client*/
     }
     
-    /*public void readMessagesFromClient() {
-        byte[] messageByte = new byte[1000];
-        try {
-            bluetoothInputStream.read(messageByte);
-            String message = new String(messageByte, "UTF-8");
-            while (!message.equals("Done.")) {
-                System.out.println(message);
-                messageByte = new byte[1000];
-                bluetoothInputStream.read(messageByte);
-                message = new String(messageByte, "UTF-8");
-                message = message.trim();
-                if (message.equals("LocalListener connected")) {
-                    
-                }
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        System.out.println("Done");
-        messageByte = "Done.".getBytes();
-        try {
-            messageQueue.put(messageByte);
-        } catch (InterruptedException e) {
-            System.out.println(e.getMessage());
-        }
-        running.set(false);
-    }*/
     
     private void listenToMessage() {
         System.out.println("In listenToMessage");

@@ -73,6 +73,7 @@ public class Communication implements Runnable {
                     }
                 } catch (IOException ioException) {
                     System.out.println(ioException.getMessage());
+                    System.out.println("Disconnected!");
                 }
             }
         }
